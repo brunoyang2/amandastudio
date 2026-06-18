@@ -10,6 +10,13 @@
   --gold-light: #f3e5ab;
   --gold-dark: #b8912d;
 
+  /* Cores para o Painel Admin (Light Mode) */
+  --admin-bg: #fdfbf7;
+  --admin-sidebar: #2d160d;
+  --admin-card-bg: #ffffff;
+  --admin-text-dark: #333333;
+  --admin-text-light: #777777;
+
   --border-radius: 12px;
   --transition-speed: 0.3s;
 }

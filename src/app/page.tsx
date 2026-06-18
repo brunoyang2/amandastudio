@@ -17,6 +17,9 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
 
+    console.log("URL CONFIGURADA:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+    console.log("CHAVE ANON:", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 5) + "...");
+
     try {
       // Juntando data e hora em um formato que o banco entende (ISO 8601 Timestamp)
       const dateTimeString = `${formData.date}T${formData.time}:00-03:00`; // Considerando horário de Brasília
