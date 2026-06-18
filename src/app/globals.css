@@ -21,6 +21,65 @@
   --transition-speed: 0.3s;
 }
 
+/* Responsividade Admin */
+.admin-sidebar {
+  width: 260px;
+  background-color: var(--admin-sidebar);
+  color: var(--gold-light);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 0;
+  transition: transform 0.3s ease;
+  z-index: 50;
+}
+
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--gold-dark);
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+.admin-overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+  }
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+  .hamburger-btn {
+    display: block;
+  }
+  .admin-overlay.open {
+    display: block;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 40;
+  }
+  /* Ajustes para botões no cabeçalho do celular */
+  .admin-header-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .admin-header-actions button {
+    padding: 8px 12px !important;
+    font-size: 0.9rem;
+  }
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

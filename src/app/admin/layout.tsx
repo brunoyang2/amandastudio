@@ -11,6 +11,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   
   const [isAgendarOpen, setIsAgendarOpen] = useState(false);
   const [isNovoClienteOpen, setIsNovoClienteOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: '📊' },
@@ -22,19 +23,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--admin-bg)', color: 'var(--admin-text-dark)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--admin-bg)', color: 'var(--admin-text-dark)', overflowX: 'hidden' }}>
       
+      {/* Overlay escuro pro celular quando o menu abre */}
+      <div 
+        className={`admin-overlay ${isSidebarOpen ? 'open' : ''}`} 
+        onClick={() => setIsSidebarOpen(false)}
+      ></div>
+
       {/* Sidebar */}
-      <aside style={{ 
-        width: '260px', 
-        backgroundColor: 'var(--admin-sidebar)', 
-        color: 'var(--gold-light)', 
-        display: 'flex', 
-        flexDirection: 'column',
-        padding: '2rem 0'
-      }}>
-        <div style={{ padding: '0 2rem', marginBottom: '2rem', textAlign: 'center' }}>
+      <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <div style={{ padding: '0 2rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 className="gold-text" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Amanda Studio</h2>
+          <button 
+            className="hamburger-btn" 
+            style={{ display: isSidebarOpen ? 'block' : 'none', color: 'var(--gold-light)' }} 
+            onClick={() => setIsSidebarOpen(false)}
+          >
+            ✕
+          </button>
         </div>
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0 1rem' }}>
@@ -44,6 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link 
                 key={item.name} 
                 href={item.path}
+                onClick={() => setIsSidebarOpen(false)} // Fecha ao clicar no mobile
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -66,24 +74,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
         
         {/* Topbar */}
         <header style={{ 
-          height: '80px', 
+          minHeight: '80px', 
           backgroundColor: '#fff', 
           borderBottom: '1px solid #eee',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 2rem'
+          padding: '1rem 1.5rem',
+          flexWrap: 'wrap',
+          gap: '1rem'
         }}>
-          <div style={{ flex: 1, maxWidth: '400px' }}>
+          
+          {/* Hambúrguer + Pesquisa */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '250px' }}>
+            <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>
+              ☰
+            </button>
             <input 
               type="text" 
-              placeholder="🔍 Pesquisar clientes..." 
+              placeholder="🔍 Pesquisar..." 
               style={{
                 width: '100%',
+                maxWidth: '350px',
                 padding: '12px 20px',
                 borderRadius: '20px',
                 border: '1px solid #e0e0e0',
@@ -92,7 +108,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               }}
             />
           </div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          
+          {/* Botões de Ação */}
+          <div className="admin-header-actions" style={{ display: 'flex', gap: '0.8rem' }}>
             <button 
               onClick={() => setIsAgendarOpen(true)}
               style={{
@@ -121,7 +139,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page Content */}
-        <div style={{ padding: '2rem', flex: 1, overflowY: 'auto' }}>
+        <div style={{ padding: '1.5rem', flex: 1, overflowY: 'auto' }}>
           {children}
         </div>
       </div>
