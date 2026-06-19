@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
+    totalAppointments: 0,
     totalClients: 0,
     maintenanceAlerts: 0,
     birthdaysThisMonth: 0,
@@ -16,6 +17,12 @@ export default function AdminDashboard() {
     async function loadStats() {
       setLoading(true);
       
+      // 0. Total Agendados (não cancelados)
+      const { count: appointmentsCount } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .neq('status', 'cancelado');
+
       // 1. Total de Clientes
       const { count: clientCount } = await supabase
         .from('clients')
@@ -49,6 +56,7 @@ export default function AdminDashboard() {
       }
 
       setStats({
+        totalAppointments: appointmentsCount || 0,
         totalClients: clientCount || 0,
         maintenanceAlerts: maintenanceCount || 0,
         cancellations: cancelledCount || 0,
@@ -61,8 +69,9 @@ export default function AdminDashboard() {
   }, []);
 
   const kpis = [
+    { title: 'Total Agendados', value: loading ? '...' : stats.totalAppointments, icon: '📅', color: '#48bb78' },
     { title: 'Total de Clientes', value: loading ? '...' : stats.totalClients, icon: '👥', color: '#4facfe' },
-    { title: 'Manutenções Atrasadas', value: loading ? '...' : stats.maintenanceAlerts, icon: '📅', color: '#ff6a88' },
+    { title: 'Manutenções Atrasadas', value: loading ? '...' : stats.maintenanceAlerts, icon: '💅', color: '#ff6a88' },
     { title: 'Aniversariantes do Mês', value: loading ? '...' : stats.birthdaysThisMonth, icon: '🎁', color: '#c471ed' },
     { title: 'Cancelamentos', value: loading ? '...' : stats.cancellations, icon: '❌', color: '#fddb92' },
   ];
