@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { UserPlus } from 'lucide-react';
 
 export default function NovoClienteModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const [formData, setFormData] = useState({
@@ -97,10 +98,11 @@ export default function NovoClienteModal({ isOpen, onClose }: { isOpen: boolean,
               cursor: loading ? 'not-allowed' : 'pointer',
               display: 'flex',
               justifyContent: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              gap: '0.5rem'
             }}
           >
-            {loading ? 'A Guardar...' : '👤+ Guardar Ficha de Cliente'}
+            {loading ? 'A Guardar...' : <><UserPlus size={18} /> Guardar Ficha de Cliente</>}
           </button>
         </form>
       </div>

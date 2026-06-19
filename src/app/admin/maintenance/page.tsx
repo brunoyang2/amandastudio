@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { Phone, CheckCircle, AlertTriangle, Smartphone } from 'lucide-react';
 
 interface Client {
   id: string;
@@ -100,8 +101,8 @@ export default function MaintenancePage() {
       {loading ? (
         <p>Procurando clientes atrasados...</p>
       ) : clients.length === 0 ? (
-        <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #eee' }}>
-          ✅ Todas as clientes estão em dia com a manutenção!
+        <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #eee', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: '#38a169', fontWeight: 'bold' }}>
+          <CheckCircle size={20} /> Todas as clientes estão em dia com a manutenção!
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -126,11 +127,11 @@ export default function MaintenancePage() {
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1a365d', marginBottom: '0.3rem' }}>
                   {client.name}
                 </h3>
-                <p style={{ color: 'var(--admin-text-light)', fontSize: '0.9rem', marginBottom: '0.8rem' }}>
-                  📞 {client.phone}
+                <p style={{ color: 'var(--admin-text-light)', fontSize: '0.9rem', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Phone size={14} /> {client.phone}
                 </p>
-                <div style={{ color: '#e53e3e', backgroundColor: '#fff5f5', padding: '4px 10px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold', display: 'inline-block' }}>
-                  ⚠️ Há {client.days_since} dias sem vir (Última vez em: {formatDate(client.last_visit_date)})
+                <div style={{ color: '#e53e3e', backgroundColor: '#fff5f5', padding: '4px 10px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <AlertTriangle size={14} /> Há {client.days_since} dias sem vir (Última vez em: {formatDate(client.last_visit_date)})
                 </div>
               </div>
               
@@ -150,7 +151,7 @@ export default function MaintenancePage() {
                   boxShadow: '0 4px 6px rgba(72, 187, 120, 0.2)'
                 }}
               >
-                📱 Enviar Mensagem via WhatsApp
+                <Smartphone size={18} /> Reagendar Manutenção
               </button>
             </div>
           ))}

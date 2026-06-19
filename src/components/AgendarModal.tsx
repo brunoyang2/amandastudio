@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { Users, Search, Calendar, Clock, Scissors, Check } from 'lucide-react';
 
 export default function AgendarModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const [clients, setClients] = useState<any[]>([]);
@@ -118,12 +119,13 @@ export default function AgendarModal({ isOpen, onClose }: { isOpen: boolean, onC
           {/* Selecionar Cliente */}
           <div>
             <label style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              👥 1. Selecionar Cliente
+              <Users size={18} /> 1. Selecionar Cliente
             </label>
             <div style={{ position: 'relative' }}>
+              <Search size={18} style={{ position: 'absolute', top: '12px', left: '12px', color: '#a0aec0' }} />
               <input 
                 type="text" 
-                placeholder="🔍 Escreva o nome para procurar..." 
+                placeholder="Escreva o nome para procurar..." 
                 value={searchClient}
                 onChange={e => { setSearchClient(e.target.value); setShowDropdown(true); }}
                 onFocus={() => setShowDropdown(true)}
@@ -154,14 +156,14 @@ export default function AgendarModal({ isOpen, onClose }: { isOpen: boolean, onC
           {/* Data e Horário */}
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <div style={{ flex: 1 }}>
-              <label style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748', display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>📅 2. Data</label>
+              <label style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}><Calendar size={18} /> 2. Data</label>
               <input 
                 type="date" required value={date} onChange={e => setDate(e.target.value)}
                 style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none' }}
               />
             </div>
             <div style={{ flex: 1 }}>
-              <label style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748', display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>🕒 3. Horário</label>
+              <label style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}><Clock size={18} /> 3. Horário</label>
               <select value={time} onChange={e => setTime(e.target.value)} style={{ width: '100%', padding: '12px 15px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none', backgroundColor: '#fff' }}>
                 {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -170,8 +172,8 @@ export default function AgendarModal({ isOpen, onClose }: { isOpen: boolean, onC
 
           {/* Serviços Solicitados */}
           <div>
-            <label style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748', display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-              ✂️ 4. Serviços Solicitados (Opcional Combo)
+            <label style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#2d3748', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+              <Scissors size={18} /> 4. Serviços Solicitados (Opcional Combo)
             </label>
             
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1rem' }}>
@@ -248,7 +250,7 @@ export default function AgendarModal({ isOpen, onClose }: { isOpen: boolean, onC
                 gap: '0.5rem'
               }}
             >
-              ✔️ Confirmar Agendamento
+              <Check size={18} /> Confirmar Agendamento
             </button>
           </div>
         </form>

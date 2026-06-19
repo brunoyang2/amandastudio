@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { Phone, Calendar, Gift, Trash2 } from 'lucide-react';
 
 interface Client {
   id: string;
@@ -85,13 +86,13 @@ export default function ClientsPage() {
                 </h3>
                 <div style={{ display: 'flex', gap: '2rem', color: 'var(--admin-text-light)', fontSize: '0.9rem' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    📞 {client.phone}
+                    <Phone size={14} /> {client.phone}
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#b8912d' }}>
-                    📅 Visita: {formatDate(client.last_visit_date)}
+                    <Calendar size={14} /> Visita: {formatDate(client.last_visit_date)}
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#9f7aea' }}>
-                    🎂 Nasc: {formatDate(client.birthdate)}
+                    <Gift size={14} /> Nasc: {formatDate(client.birthdate)}
                   </span>
                 </div>
               </div>
@@ -108,7 +109,7 @@ export default function ClientsPage() {
                 }}
                 title="Apagar Cliente"
               >
-                🗑️
+                <Trash2 size={20} />
               </button>
             </div>
           ))}

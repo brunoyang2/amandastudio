@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import AgendarModal from '../../components/AgendarModal';
 import NovoClienteModal from '../../components/NovoClienteModal';
+import { LayoutDashboard, Calendar, Users, Scissors, XCircle, Gift, Menu, X, CalendarPlus, UserPlus } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -14,12 +15,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
-    { name: 'Dashboard', path: '/admin', icon: '📊' },
-    { name: 'Agenda', path: '/admin/agenda', icon: '📅' },
-    { name: 'Clientes', path: '/admin/clients', icon: '👥' },
-    { name: 'Manutenções', path: '/admin/maintenance', icon: '💅' },
-    { name: 'Cancelamentos', path: '/admin/cancellations', icon: '❌' },
-    { name: 'Aniversários', path: '/admin/birthdays', icon: '🎁' },
+    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
+    { name: 'Agenda', path: '/admin/agenda', icon: <Calendar size={20} /> },
+    { name: 'Clientes', path: '/admin/clients', icon: <Users size={20} /> },
+    { name: 'Manutenções', path: '/admin/maintenance', icon: <Scissors size={20} /> },
+    { name: 'Cancelamentos', path: '/admin/cancellations', icon: <XCircle size={20} /> },
+    { name: 'Aniversários', path: '/admin/birthdays', icon: <Gift size={20} /> },
   ];
 
   return (
@@ -40,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             style={{ display: isSidebarOpen ? 'block' : 'none', color: 'var(--gold-light)' }} 
             onClick={() => setIsSidebarOpen(false)}
           >
-            ✕
+            <X size={24} />
           </button>
         </div>
 
@@ -65,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   transition: 'all 0.2s'
                 }}
               >
-                <span>{item.icon}</span>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.icon}</span>
                 {item.name}
               </Link>
             );
@@ -92,11 +93,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Hambúrguer + Pesquisa */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '250px' }}>
             <button className="hamburger-btn" onClick={() => setIsSidebarOpen(true)}>
-              ☰
+              <Menu size={24} />
             </button>
             <input 
               type="text" 
-              placeholder="🔍 Pesquisar..." 
+              placeholder="Pesquisar..." 
               style={{
                 width: '100%',
                 maxWidth: '350px',
@@ -126,14 +127,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 gap: '0.5rem'
               }}
             >
-              📅 Agendar
+              <CalendarPlus size={18} /> Agendar
             </button>
             <button 
               onClick={() => setIsNovoClienteOpen(true)}
               className="btn-primary" 
               style={{ padding: '10px 20px', textTransform: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
-              👤+ Novo Cliente
+              <UserPlus size={18} /> Novo Cliente
             </button>
           </div>
         </header>

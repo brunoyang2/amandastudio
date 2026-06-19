@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { Gift, Phone, Smartphone } from 'lucide-react';
 
 interface Client {
   id: string;
@@ -91,14 +92,14 @@ export default function BirthdaysPage() {
                   backgroundColor: '#faf5ff', color: '#9f7aea', 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' 
                 }}>
-                  🎂
+                  <Gift size={24} />
                 </div>
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1a365d', marginBottom: '0.2rem' }}>
                     {client.name}
                   </h3>
-                  <p style={{ color: 'var(--admin-text-light)', fontSize: '0.9rem', marginBottom: '0.2rem' }}>
-                    📞 {client.phone}
+                  <p style={{ color: 'var(--admin-text-light)', fontSize: '0.9rem', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Phone size={14} /> {client.phone}
                   </p>
                   <p style={{ color: '#9f7aea', fontSize: '0.9rem', fontWeight: 'bold' }}>
                     {formatBirthday(client.birthdate)}
@@ -122,7 +123,7 @@ export default function BirthdaysPage() {
                   boxShadow: '0 4px 6px rgba(72, 187, 120, 0.2)'
                 }}
               >
-                📱 Enviar Parabéns
+                <Smartphone size={18} /> Enviar Parabéns
               </button>
             </div>
           ))}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
-import { Calendar } from 'lucide-react';
+import { Calendar, Phone, CheckCircle, Smartphone } from 'lucide-react';
 
 interface CancelledAppt {
   id: string;
@@ -118,7 +118,7 @@ export default function CancellationsPage() {
           <div style={{ 
             width: '60px', height: '60px', borderRadius: '50%', border: '4px solid #68d391', 
             color: '#68d391', fontSize: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>✓</div>
+          }}><CheckCircle size={32} /></div>
           <p style={{ color: '#4a5568', fontSize: '1.1rem' }}>
             Nenhum cancelamento registado. As suas clientes são pontuais!
           </p>
@@ -146,8 +146,8 @@ export default function CancellationsPage() {
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1a365d' }}>
                   {appt.clients?.name}
                 </h3>
-                <p style={{ color: 'var(--admin-text-light)', marginTop: '0.5rem' }}>
-                  📞 {appt.clients?.phone} • 📅 Horário Cancelado: {formatDateTime(appt.date_time)}
+                <p style={{ color: 'var(--admin-text-light)', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Phone size={14} /> {appt.clients?.phone} • <Calendar size={14} /> Horário Cancelado: {formatDateTime(appt.date_time)}
                 </p>
                 <p style={{ color: '#718096', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                   Serviços: {appt.services?.join(', ')}
@@ -190,7 +190,7 @@ export default function CancellationsPage() {
                     boxShadow: '0 4px 6px rgba(72, 187, 120, 0.2)'
                   }}
                 >
-                  📱 Reagendar via WhatsApp
+                  <Smartphone size={18} /> Reagendar via WhatsApp
                 </button>
               </div>
             </div>

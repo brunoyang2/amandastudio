@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { Clock, CheckCircle, XCircle } from 'lucide-react';
 
 export default function AgendaPage() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -147,8 +148,8 @@ export default function AgendaPage() {
       </div>
 
       <div style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #f0f0f0', overflow: 'hidden' }}>
-        <div style={{ backgroundColor: '#faf8f5', padding: '15px 20px', borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', color: '#8b5e34' }}>
-          🕒 Horários do dia
+        <div style={{ backgroundColor: '#faf8f5', padding: '15px 20px', borderBottom: '1px solid #f0f0f0', fontWeight: 'bold', color: '#8b5e34', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Clock size={18} /> Horários do dia
         </div>
 
         {loading ? (
@@ -193,10 +194,10 @@ export default function AgendaPage() {
                           {appt.status !== 'concluido' && (
                             <button 
                               onClick={() => handleConcluirAppointment(appt.id)}
-                              style={{ background: 'none', border: 'none', color: '#48bb78', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
+                              style={{ background: 'none', border: 'none', color: '#48bb78', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: '5px' }}
                               title="Concluir Agendamento (Cliente veio)"
                             >
-                              ✅
+                              <CheckCircle size={20} />
                             </button>
                           )}
                           {appt.status === 'concluido' ? (
@@ -204,10 +205,10 @@ export default function AgendaPage() {
                           ) : (
                             <button 
                               onClick={() => handleCancelAppointment(appt.id)}
-                              style={{ background: 'none', border: 'none', color: '#e53e3e', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
+                              style={{ background: 'none', border: 'none', color: '#e53e3e', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: '5px' }}
                               title="Cancelar Agendamento"
                             >
-                              ❌
+                              <XCircle size={20} />
                             </button>
                           )}
                         </div>
