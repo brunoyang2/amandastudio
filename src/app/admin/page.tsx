@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import Link from 'next/link';
 
+import { CalendarCheck, Users, Scissors, Gift, XCircle } from 'lucide-react';
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
     totalAppointments: 0,
@@ -96,11 +98,11 @@ export default function AdminDashboard() {
   }, []);
 
   const kpis = [
-    { title: 'Total Agendados', value: loading ? '...' : stats.totalAppointments, icon: '📅', color: '#48bb78', href: '/admin/agenda' },
-    { title: 'Total de Clientes', value: loading ? '...' : stats.totalClients, icon: '👥', color: '#4facfe', href: '/admin/clients' },
-    { title: 'Manutenções Atrasadas', value: loading ? '...' : stats.maintenanceAlerts, icon: '💅', color: '#ff6a88', href: '/admin/maintenance' },
-    { title: 'Aniversariantes do Mês', value: loading ? '...' : stats.birthdaysThisMonth, icon: '🎁', color: '#c471ed', href: '/admin/birthdays' },
-    { title: 'Cancelamentos', value: loading ? '...' : stats.cancellations, icon: '❌', color: '#fddb92', href: '/admin/cancellations' },
+    { title: 'Total Agendados', value: loading ? '...' : stats.totalAppointments, icon: <CalendarCheck size={24} />, color: '#48bb78', href: '/admin/agenda' },
+    { title: 'Total de Clientes', value: loading ? '...' : stats.totalClients, icon: <Users size={24} />, color: '#4facfe', href: '/admin/clients' },
+    { title: 'Manutenções Atrasadas', value: loading ? '...' : stats.maintenanceAlerts, icon: <Scissors size={24} />, color: '#ff6a88', href: '/admin/maintenance' },
+    { title: 'Aniversariantes do Mês', value: loading ? '...' : stats.birthdaysThisMonth, icon: <Gift size={24} />, color: '#c471ed', href: '/admin/birthdays' },
+    { title: 'Cancelamentos', value: loading ? '...' : stats.cancellations, icon: <XCircle size={24} />, color: '#fddb92', href: '/admin/cancellations' },
   ];
 
   return (

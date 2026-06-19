@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { Calendar } from 'lucide-react';
 
 interface CancelledAppt {
   id: string;
@@ -18,29 +19,36 @@ export default function CancellationsPage() {
   const [appointments, setAppointments] = useState<CancelledAppt[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadCancellations() {
-      // Usando inner join com a tabela clients
-      const { data, error } = await supabase
-        .from('appointments')
-        .select(`
-          id,
-          date_time,
-          services,
-          clients (
-            name,
-            phone
-          )
-        `)
-        .eq('status', 'cancelado')
-        .order('date_time', { ascending: false });
+  // Estados do Modal de Remarcar
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAppt, setSelectedAppt] = useState<CancelledAppt | null>(null);
+  const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('');
 
-      if (data) {
-        // @ts-ignore
-        setAppointments(data);
-      }
-      setLoading(false);
+  const loadCancellations = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('appointments')
+      .select(`
+        id,
+        date_time,
+        services,
+        clients (
+          name,
+          phone
+        )
+      `)
+      .eq('status', 'cancelado')
+      .order('date_time', { ascending: false });
+
+    if (data) {
+      // @ts-ignore
+      setAppointments(data);
     }
+    setLoading(false);
+  };
+
+  useEffect(() => {
     loadCancellations();
   }, []);
 
@@ -55,6 +63,36 @@ export default function CancellationsPage() {
     const timeFormatted = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
     const message = `Olá ${name}, percebi que o seu agendamento de ${timeFormatted} foi cancelado. Gostaria de verificar um novo horário para reagendarmos?`;
     window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const openRescheduleModal = (appt: CancelledAppt) => {
+    setSelectedAppt(appt);
+    setNewDate('');
+    setNewTime('');
+    setIsModalOpen(true);
+  };
+
+  const handleReschedule = async () => {
+    if (!selectedAppt || !newDate || !newTime) {
+      alert('Por favor, preencha a nova data e o novo horário.');
+      return;
+    }
+
+    const newDateTime = `${newDate}T${newTime}:00-03:00`;
+    
+    // Atualiza o agendamento para o novo horário e muda o status de volta para confirmado
+    const { error } = await supabase
+      .from('appointments')
+      .update({ date_time: newDateTime, status: 'confirmado' })
+      .eq('id', selectedAppt.id);
+
+    if (!error) {
+      alert('Agendamento remarcado com sucesso!');
+      setIsModalOpen(false);
+      loadCancellations(); // Recarrega a lista para remover o item
+    } else {
+      alert('Erro ao remarcar agendamento.');
+    }
   };
 
   return (
@@ -99,7 +137,9 @@ export default function CancellationsPage() {
                 boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '1rem'
               }}
             >
               <div>
@@ -113,26 +153,99 @@ export default function CancellationsPage() {
                   Serviços: {appt.services?.join(', ')}
                 </p>
               </div>
-              <button 
-                onClick={() => openWhatsApp(appt.clients?.phone, appt.clients?.name, appt.date_time)}
-                style={{ 
-                  backgroundColor: '#48bb78', 
-                  color: 'white',
-                  border: 'none',
-                  padding: '10px 20px', 
-                  borderRadius: '8px',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 6px rgba(72, 187, 120, 0.2)'
-                }}
-              >
-                📱 Reagendar via WhatsApp
-              </button>
+              
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button 
+                  onClick={() => openRescheduleModal(appt)}
+                  style={{ 
+                    backgroundColor: '#fff', 
+                    color: '#1a365d',
+                    border: '1px solid #e2e8f0',
+                    padding: '10px 20px', 
+                    borderRadius: '8px',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                  }}
+                >
+                  <Calendar size={18} /> Remarcar Horário
+                </button>
+
+                <button 
+                  onClick={() => openWhatsApp(appt.clients?.phone, appt.clients?.name, appt.date_time)}
+                  style={{ 
+                    backgroundColor: '#48bb78', 
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 20px', 
+                    borderRadius: '8px',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 6px rgba(72, 187, 120, 0.2)'
+                  }}
+                >
+                  📱 Reagendar via WhatsApp
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Modal de Remarcação */}
+      {isModalOpen && selectedAppt && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ backgroundColor: '#fff', padding: '2rem', borderRadius: '16px', width: '90%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1a365d' }}>Remarcar Cliente</h2>
+              <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#a0aec0' }}>&times;</button>
+            </div>
+            
+            <p style={{ marginBottom: '1.5rem', color: '#4a5568' }}>
+              Escolha a nova data e horário para <strong>{selectedAppt.clients?.name}</strong>.
+            </p>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#4a5568' }}>Nova Data</label>
+              <input 
+                type="date" 
+                value={newDate}
+                onChange={e => setNewDate(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none' }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '2rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#4a5568' }}>Novo Horário</label>
+              <input 
+                type="time" 
+                value={newTime}
+                onChange={e => setNewTime(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                style={{ flex: 1, padding: '12px', backgroundColor: '#edf2f7', color: '#4a5568', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleReschedule}
+                style={{ flex: 1, padding: '12px', backgroundColor: 'var(--admin-sidebar)', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                Confirmar Novo Horário
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
