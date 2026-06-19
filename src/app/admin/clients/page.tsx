@@ -70,31 +70,26 @@ export default function ClientsPage() {
             <div 
               key={client.id}
               style={{
-                backgroundColor: 'var(--admin-card-bg)',
+                backgroundColor: '#fff',
                 padding: '1.5rem',
                 borderRadius: '16px',
                 border: '1px solid #f0f0f0',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+                borderLeft: '4px solid #3182ce',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '1rem'
               }}
             >
               <div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1a365d', marginBottom: '0.5rem' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1a365d' }}>
                   {client.name}
                 </h3>
-                <div style={{ display: 'flex', gap: '2rem', color: 'var(--admin-text-light)', fontSize: '0.9rem' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Phone size={14} /> {client.phone}
-                  </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#b8912d' }}>
-                    <Calendar size={14} /> Visita: {formatDate(client.last_visit_date)}
-                  </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#9f7aea' }}>
-                    <Gift size={14} /> Nasc: {formatDate(client.birthdate)}
-                  </span>
-                </div>
+                <p style={{ color: 'var(--admin-text-light)', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Phone size={14} /> {client.phone} • <Calendar size={14} /> Visita: {formatDate(client.last_visit_date)} • <Gift size={14} /> Nasc: {formatDate(client.birthdate)}
+                </p>
               </div>
               
               <button 
