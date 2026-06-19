@@ -49,6 +49,14 @@ export default function CancellationsPage() {
     return `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
   };
 
+  const openWhatsApp = (phone: string, name: string, dateString: string) => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const d = new Date(dateString);
+    const timeFormatted = `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
+    const message = `Olá ${name}, percebi que o seu agendamento de ${timeFormatted} foi cancelado. Gostaria de verificar um novo horário para reagendarmos?`;
+    window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
   return (
     <div>
       <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem', color: 'var(--admin-sidebar)' }}>
@@ -88,18 +96,41 @@ export default function CancellationsPage() {
                 borderRadius: '16px',
                 border: '1px solid #f0f0f0',
                 borderLeft: '4px solid #ecc94b',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
+                boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
               }}
             >
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1a365d' }}>
-                {appt.clients?.name}
-              </h3>
-              <p style={{ color: 'var(--admin-text-light)', marginTop: '0.5rem' }}>
-                📞 {appt.clients?.phone} • 📅 Horário Cancelado: {formatDateTime(appt.date_time)}
-              </p>
-              <p style={{ color: '#718096', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                Serviços: {appt.services?.join(', ')}
-              </p>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1a365d' }}>
+                  {appt.clients?.name}
+                </h3>
+                <p style={{ color: 'var(--admin-text-light)', marginTop: '0.5rem' }}>
+                  📞 {appt.clients?.phone} • 📅 Horário Cancelado: {formatDateTime(appt.date_time)}
+                </p>
+                <p style={{ color: '#718096', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                  Serviços: {appt.services?.join(', ')}
+                </p>
+              </div>
+              <button 
+                onClick={() => openWhatsApp(appt.clients?.phone, appt.clients?.name, appt.date_time)}
+                style={{ 
+                  backgroundColor: '#48bb78', 
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px', 
+                  borderRadius: '8px',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 6px rgba(72, 187, 120, 0.2)'
+                }}
+              >
+                📱 Reagendar via WhatsApp
+              </button>
             </div>
           ))}
         </div>

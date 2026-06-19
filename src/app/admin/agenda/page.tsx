@@ -94,6 +94,22 @@ export default function AgendaPage() {
     }
   };
 
+  const handleCancelAppointment = async (apptId: string) => {
+    if (window.confirm('Tem certeza que deseja cancelar este agendamento e deixar o horário livre?')) {
+      const { error } = await supabase.from('appointments').update({ status: 'cancelado' }).eq('id', apptId);
+      if (!error) {
+        alert('Agendamento cancelado com sucesso.');
+        // Recarregar
+        const startOfDay = `${selectedDate}T00:00:00-03:00`;
+        const endOfDay = `${selectedDate}T23:59:59-03:00`;
+        const { data } = await supabase.from('appointments').select('*, clients(name, phone)').gte('date_time', startOfDay).lte('date_time', endOfDay).neq('status', 'cancelado');
+        setAppointments(data || []);
+      } else {
+        alert('Erro ao cancelar agendamento.');
+      }
+    }
+  };
+
   // Filtra clientes baseados na pesquisa (Nome ou Telefone)
   const filteredClients = clients.filter(c => 
     c.name.toLowerCase().includes(formClientSearch.toLowerCase()) || 
@@ -138,9 +154,18 @@ export default function AgendaPage() {
                   
                   <div style={{ flex: 1, padding: '10px 20px', display: 'flex', alignItems: 'center' }}>
                     {appt ? (
-                      <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 15px', borderRadius: '8px', width: '100%' }}>
-                        <div style={{ fontWeight: 'bold', color: '#166534' }}>{appt.clients?.name} <span style={{ fontWeight: 'normal', fontSize: '0.9rem' }}>({appt.clients?.phone})</span></div>
-                        <div style={{ fontSize: '0.85rem', color: '#15803d', marginTop: '4px' }}>Serviços: {appt.services.join(', ')}</div>
+                      <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 15px', borderRadius: '8px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontWeight: 'bold', color: '#166534' }}>{appt.clients?.name} <span style={{ fontWeight: 'normal', fontSize: '0.9rem' }}>({appt.clients?.phone})</span></div>
+                          <div style={{ fontSize: '0.85rem', color: '#15803d', marginTop: '4px' }}>Serviços: {appt.services.join(', ')}</div>
+                        </div>
+                        <button 
+                          onClick={() => handleCancelAppointment(appt.id)}
+                          style={{ background: 'none', border: 'none', color: '#e53e3e', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
+                          title="Cancelar Agendamento"
+                        >
+                          ❌
+                        </button>
                       </div>
                     ) : (
                       <button 
