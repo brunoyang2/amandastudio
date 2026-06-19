@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import Link from 'next/link';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -17,11 +18,11 @@ export default function AdminDashboard() {
     async function loadStats() {
       setLoading(true);
       
-      // 0. Total Agendados (não cancelados)
+      // 0. Total Agendados (não cancelados nem concluídos)
       const { count: appointmentsCount } = await supabase
         .from('appointments')
         .select('*', { count: 'exact', head: true })
-        .neq('status', 'cancelado');
+        .in('status', ['pendente', 'confirmado']);
 
       // 1. Total de Clientes
       const { count: clientCount } = await supabase
@@ -95,11 +96,11 @@ export default function AdminDashboard() {
   }, []);
 
   const kpis = [
-    { title: 'Total Agendados', value: loading ? '...' : stats.totalAppointments, icon: '📅', color: '#48bb78' },
-    { title: 'Total de Clientes', value: loading ? '...' : stats.totalClients, icon: '👥', color: '#4facfe' },
-    { title: 'Manutenções Atrasadas', value: loading ? '...' : stats.maintenanceAlerts, icon: '💅', color: '#ff6a88' },
-    { title: 'Aniversariantes do Mês', value: loading ? '...' : stats.birthdaysThisMonth, icon: '🎁', color: '#c471ed' },
-    { title: 'Cancelamentos', value: loading ? '...' : stats.cancellations, icon: '❌', color: '#fddb92' },
+    { title: 'Total Agendados', value: loading ? '...' : stats.totalAppointments, icon: '📅', color: '#48bb78', href: '/admin/agenda' },
+    { title: 'Total de Clientes', value: loading ? '...' : stats.totalClients, icon: '👥', color: '#4facfe', href: '/admin/clients' },
+    { title: 'Manutenções Atrasadas', value: loading ? '...' : stats.maintenanceAlerts, icon: '💅', color: '#ff6a88', href: '/admin/maintenance' },
+    { title: 'Aniversariantes do Mês', value: loading ? '...' : stats.birthdaysThisMonth, icon: '🎁', color: '#c471ed', href: '/admin/birthdays' },
+    { title: 'Cancelamentos', value: loading ? '...' : stats.cancellations, icon: '❌', color: '#fddb92', href: '/admin/cancellations' },
   ];
 
   return (
@@ -110,13 +111,14 @@ export default function AdminDashboard() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
         {kpis.map((kpi, idx) => (
-          <div 
+          <Link 
+            href={kpi.href}
             key={idx} 
+            className="kpi-card"
             style={{ 
               backgroundColor: 'var(--admin-card-bg)', 
               padding: '1.5rem', 
               borderRadius: '16px', 
-              boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
               border: '1px solid #f0f0f0',
               display: 'flex',
               flexDirection: 'column',
@@ -144,7 +146,7 @@ export default function AdminDashboard() {
                 {kpi.value}
               </h2>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

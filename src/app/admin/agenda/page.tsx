@@ -110,6 +110,22 @@ export default function AgendaPage() {
     }
   };
 
+  const handleConcluirAppointment = async (apptId: string) => {
+    if (window.confirm('A cliente já foi atendida? Ao concluir, este agendamento sairá da contagem do Dashboard.')) {
+      const { error } = await supabase.from('appointments').update({ status: 'concluido' }).eq('id', apptId);
+      if (!error) {
+        alert('Agendamento concluído com sucesso!');
+        // Recarregar
+        const startOfDay = `${selectedDate}T00:00:00-03:00`;
+        const endOfDay = `${selectedDate}T23:59:59-03:00`;
+        const { data } = await supabase.from('appointments').select('*, clients(name, phone)').gte('date_time', startOfDay).lte('date_time', endOfDay).neq('status', 'cancelado');
+        setAppointments(data || []);
+      } else {
+        alert('Erro ao concluir agendamento.');
+      }
+    }
+  };
+
   // Filtra clientes baseados na pesquisa (Nome ou Telefone)
   const filteredClients = clients.filter(c => 
     c.name.toLowerCase().includes(formClientSearch.toLowerCase()) || 
@@ -154,18 +170,47 @@ export default function AgendaPage() {
                   
                   <div style={{ flex: 1, padding: '10px 20px', display: 'flex', alignItems: 'center' }}>
                     {appt ? (
-                      <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 15px', borderRadius: '8px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ 
+                        backgroundColor: appt.status === 'concluido' ? '#f7fafc' : '#f0fdf4', 
+                        border: appt.status === 'concluido' ? '1px solid #e2e8f0' : '1px solid #bbf7d0', 
+                        padding: '10px 15px', 
+                        borderRadius: '8px', 
+                        width: '100%', 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        opacity: appt.status === 'concluido' ? 0.7 : 1
+                      }}>
                         <div>
-                          <div style={{ fontWeight: 'bold', color: '#166534' }}>{appt.clients?.name} <span style={{ fontWeight: 'normal', fontSize: '0.9rem' }}>({appt.clients?.phone})</span></div>
-                          <div style={{ fontSize: '0.85rem', color: '#15803d', marginTop: '4px' }}>Serviços: {appt.services.join(', ')}</div>
+                          <div style={{ fontWeight: 'bold', color: appt.status === 'concluido' ? '#4a5568' : '#166534', textDecoration: appt.status === 'concluido' ? 'line-through' : 'none' }}>
+                            {appt.clients?.name} <span style={{ fontWeight: 'normal', fontSize: '0.9rem' }}>({appt.clients?.phone})</span>
+                          </div>
+                          <div style={{ fontSize: '0.85rem', color: appt.status === 'concluido' ? '#718096' : '#15803d', marginTop: '4px' }}>
+                            Serviços: {appt.services.join(', ')}
+                          </div>
                         </div>
-                        <button 
-                          onClick={() => handleCancelAppointment(appt.id)}
-                          style={{ background: 'none', border: 'none', color: '#e53e3e', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
-                          title="Cancelar Agendamento"
-                        >
-                          ❌
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          {appt.status !== 'concluido' && (
+                            <button 
+                              onClick={() => handleConcluirAppointment(appt.id)}
+                              style={{ background: 'none', border: 'none', color: '#48bb78', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
+                              title="Concluir Agendamento (Cliente veio)"
+                            >
+                              ✅
+                            </button>
+                          )}
+                          {appt.status === 'concluido' ? (
+                            <span style={{ color: '#718096', fontWeight: 'bold', fontSize: '0.9rem' }}>Concluído</span>
+                          ) : (
+                            <button 
+                              onClick={() => handleCancelAppointment(appt.id)}
+                              style={{ background: 'none', border: 'none', color: '#e53e3e', fontSize: '1.2rem', cursor: 'pointer', padding: '5px' }}
+                              title="Cancelar Agendamento"
+                            >
+                              ❌
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ) : (
                       <button 
