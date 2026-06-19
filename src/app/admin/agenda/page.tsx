@@ -37,6 +37,7 @@ export default function AgendaPage() {
   const [formClientSearch, setFormClientSearch] = useState('');
   const [formClientId, setFormClientId] = useState('');
   const [formServices, setFormServices] = useState<string[]>([]);
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
 
   // Horários disponíveis (08:00 às 18:00, a cada 30 min)
   const timeSlots = [];
@@ -99,6 +100,7 @@ export default function AgendaPage() {
     setFormClientId('');
     setFormClientSearch('');
     setFormServices([]);
+    setShowClientDropdown(false);
     setIsModalOpen(true);
   };
 
@@ -308,15 +310,16 @@ export default function AgendaPage() {
                 <input 
                   type="text" 
                   value={formClientSearch}
-                  onChange={e => setFormClientSearch(e.target.value)}
+                  onChange={e => { setFormClientSearch(e.target.value); setShowClientDropdown(true); }}
+                  onFocus={() => setShowClientDropdown(true)}
                   placeholder="Ex: Maria"
                   style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
                 />
-                <div style={{ maxHeight: '120px', overflowY: 'auto', border: '1px solid #eee', borderRadius: '8px', display: formClientSearch ? 'block' : 'none' }}>
+                <div style={{ maxHeight: '120px', overflowY: 'auto', border: '1px solid #eee', borderRadius: '8px', display: (formClientSearch && showClientDropdown) ? 'block' : 'none' }}>
                   {filteredClients.map(c => (
                     <div 
                       key={c.id} 
-                      onClick={() => { setFormClientId(c.id); setFormClientSearch(c.name); }}
+                      onClick={() => { setFormClientId(c.id); setFormClientSearch(c.name); setShowClientDropdown(false); }}
                       style={{ padding: '10px', cursor: 'pointer', backgroundColor: formClientId === c.id ? '#e6fffa' : '#fff', borderBottom: '1px solid #f0f0f0' }}
                     >
                       {c.name} - {c.phone}
