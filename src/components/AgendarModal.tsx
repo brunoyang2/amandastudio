@@ -187,13 +187,15 @@ export default function AgendarModal({ isOpen, onClose }: { isOpen: boolean, onC
                       style={{
                         padding: '8px 16px',
                         borderRadius: '20px 0 0 20px',
-                        border: isSelected ? '1px solid var(--gold-main)' : '1px solid #cbd5e0',
+                        borderTop: isSelected ? '1px solid var(--gold-main)' : '1px solid #cbd5e0',
+                        borderBottom: isSelected ? '1px solid var(--gold-main)' : '1px solid #cbd5e0',
+                        borderLeft: isSelected ? '1px solid var(--gold-main)' : '1px solid #cbd5e0',
+                        borderRight: 'none',
                         backgroundColor: isSelected ? '#fffaf0' : '#fff',
                         color: isSelected ? 'var(--gold-dark)' : '#4a5568',
                         cursor: 'pointer',
                         fontSize: '0.9rem',
-                        fontWeight: isSelected ? 'bold' : 'normal',
-                        borderRight: 'none'
+                        fontWeight: isSelected ? 'bold' : 'normal'
                       }}
                     >
                       {s.name}
@@ -205,12 +207,14 @@ export default function AgendarModal({ isOpen, onClose }: { isOpen: boolean, onC
                       style={{
                         padding: '8px 12px',
                         borderRadius: '0 20px 20px 0',
-                        border: isSelected ? '1px solid var(--gold-main)' : '1px solid #cbd5e0',
+                        borderTop: isSelected ? '1px solid var(--gold-main)' : '1px solid #cbd5e0',
+                        borderBottom: isSelected ? '1px solid var(--gold-main)' : '1px solid #cbd5e0',
+                        borderRight: isSelected ? '1px solid var(--gold-main)' : '1px solid #cbd5e0',
+                        borderLeft: '1px solid #edf2f7',
                         backgroundColor: isSelected ? '#fffaf0' : '#fff',
                         color: '#e53e3e',
                         cursor: 'pointer',
-                        fontSize: '0.9rem',
-                        borderLeft: '1px solid #edf2f7'
+                        fontSize: '0.9rem'
                       }}
                     >
                       &times;
