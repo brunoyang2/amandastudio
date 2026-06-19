@@ -17,26 +17,64 @@ export default function MaintenancePage() {
 
   useEffect(() => {
     async function loadMaintenanceAlerts() {
+      const now = new Date();
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .lte('last_visit_date', thirtyDaysAgo.toISOString().split('T')[0])
-        .order('last_visit_date', { ascending: true }); // Quem não vem há mais tempo aparece primeiro
 
-      if (data) {
-        // Calcular os dias exatos desde a última visita
-        const now = new Date();
-        const mappedData = data.map(c => {
-          const visit = new Date(c.last_visit_date);
-          const diffTime = Math.abs(now.getTime() - visit.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          return { ...c, days_since: diffDays };
-        });
-        setClients(mappedData);
+      // 1. Pega todas as clientes
+      const { data: allClients } = await supabase.from('clients').select('*');
+      
+      // 2. Pega todos os agendamentos válidos
+      const { data: allAppointments } = await supabase
+        .from('appointments')
+        .select('client_id, date_time')
+        .neq('status', 'cancelado');
+        
+      if (!allClients) {
+        setLoading(false);
+        return;
       }
+
+      // 3. Processa cliente a cliente
+      const alerts: Client[] = [];
+      
+      allClients.forEach(client => {
+        // Pega todos os agendamentos da cliente
+        const clientAppts = (allAppointments || []).filter(a => a.client_id === client.id);
+        
+        // Verifica se tem agendamento futuro
+        const hasFutureAppt = clientAppts.some(a => new Date(a.date_time) > now);
+        
+        // Se já tem agendamento futuro, não precisa de cobrança de manutenção
+        if (hasFutureAppt) return; 
+        
+        // Acha a última visita (seja pelo último agendamento passado ou data de cadastro)
+        const pastAppts = clientAppts
+          .filter(a => new Date(a.date_time) <= now)
+          .sort((a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime());
+                                     
+        let lastVisitDateStr = client.last_visit_date; 
+        if (pastAppts.length > 0) {
+          lastVisitDateStr = pastAppts[0].date_time;
+        }
+        
+        const lastVisitDate = new Date(lastVisitDateStr);
+        
+        // Verifica se a última visita foi há mais de 30 dias (ou exatamente 30)
+        if (lastVisitDate <= thirtyDaysAgo) {
+          const diffTime = Math.abs(now.getTime() - lastVisitDate.getTime());
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          alerts.push({
+            ...client,
+            last_visit_date: lastVisitDate.toISOString().split('T')[0],
+            days_since: diffDays
+          });
+        }
+      });
+      
+      // Ordena pelos que estão mais tempo sem vir primeiro
+      alerts.sort((a, b) => b.days_since - a.days_since);
+      setClients(alerts);
       setLoading(false);
     }
     loadMaintenanceAlerts();
@@ -45,6 +83,12 @@ export default function MaintenancePage() {
   const formatDate = (dateString: string) => {
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
+  };
+
+  const openWhatsApp = (phone: string, name: string) => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const message = `Olá ${name}, tudo bem? Percebemos que já faz mais de 30 dias desde a sua última manutenção no Amanda Studio. Gostaria de verificar os horários disponíveis para deixarmos suas unhas perfeitas novamente? 💅✨`;
+    window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (
@@ -73,7 +117,9 @@ export default function MaintenancePage() {
                 boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '1rem'
               }}
             >
               <div>
@@ -84,12 +130,27 @@ export default function MaintenancePage() {
                   📞 {client.phone}
                 </p>
                 <div style={{ color: '#e53e3e', backgroundColor: '#fff5f5', padding: '4px 10px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold', display: 'inline-block' }}>
-                  ⚠️ Há {client.days_since} dias sem vir ({formatDate(client.last_visit_date)})
+                  ⚠️ Há {client.days_since} dias sem vir (Última vez em: {formatDate(client.last_visit_date)})
                 </div>
               </div>
               
-              <button className="btn-primary" style={{ padding: '10px 20px', fontSize: '0.9rem' }}>
-                📅 Agendar Manutenção
+              <button 
+                onClick={() => openWhatsApp(client.phone, client.name)}
+                style={{ 
+                  backgroundColor: '#48bb78', 
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px', 
+                  borderRadius: '8px',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 6px rgba(72, 187, 120, 0.2)'
+                }}
+              >
+                📱 Enviar Mensagem via WhatsApp
               </button>
             </div>
           ))}
