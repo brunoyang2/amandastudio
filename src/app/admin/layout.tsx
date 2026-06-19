@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import AgendarModal from '../../components/AgendarModal';
 import NovoClienteModal from '../../components/NovoClienteModal';
-import { LayoutDashboard, Calendar, Users, Scissors, XCircle, Gift, Menu, X, CalendarPlus, UserPlus } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Scissors, XCircle, Gift, Menu, X, CalendarPlus, UserPlus, BarChart } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,6 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
+    { name: 'Relatórios', path: '/admin/reports', icon: <BarChart size={20} /> },
     { name: 'Agenda', path: '/admin/agenda', icon: <Calendar size={20} /> },
     { name: 'Clientes', path: '/admin/clients', icon: <Users size={20} /> },
     { name: 'Manutenções', path: '/admin/maintenance', icon: <Scissors size={20} /> },
