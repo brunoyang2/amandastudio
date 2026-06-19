@@ -47,13 +47,13 @@ export default function BirthdaysPage() {
   const formatBirthday = (dateString: string) => {
     const months = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
     const [_, month, day] = dateString.split('-');
-    return `Faz anos a ${parseInt(day)} de ${months[parseInt(month)-1]}`;
+    return `Aniversário: ${parseInt(day)} de ${months[parseInt(month)-1]}`;
   };
 
   const openWhatsApp = (phone: string, name: string) => {
     // Limpar o telefone para conter apenas números
     const cleanPhone = phone.replace(/\D/g, '');
-    const message = `Olá ${name}! O Amanda Studio te deseja um feliz aniversário! 🎉 Tem um presente especial esperando por você aqui no Studio.`;
+    const message = `Olá ${name}! O Studio Amanda Morais te deseja um feliz aniversário! 🎉 Tem um presente especial esperando por você aqui no Studio.`;
     window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
