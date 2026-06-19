@@ -20,11 +20,15 @@ export default function AdminDashboard() {
     async function loadStats() {
       setLoading(true);
       
-      // 0. Total Agendados (não cancelados nem concluídos)
-      const { count: appointmentsCount } = await supabase
+      // Pega todos os clientes e agendamentos para os cálculos
+      const { data: allClients } = await supabase.from('clients').select('*');
+      const { data: allAppointments } = await supabase
         .from('appointments')
-        .select('*', { count: 'exact', head: true })
-        .in('status', ['pendente', 'confirmado']);
+        .select('client_id, date_time, status');
+
+      // 0. Total Agendados (não cancelados nem concluídos)
+      const activeAppointments = allAppointments?.filter(a => a.status !== 'cancelado' && a.status !== 'concluido') || [];
+      const appointmentsCount = activeAppointments.length;
 
       // 1. Total de Clientes
       const { count: clientCount } = await supabase
@@ -32,17 +36,7 @@ export default function AdminDashboard() {
         .select('*', { count: 'exact', head: true });
 
       // 3. Cancelamentos
-      const { count: cancelledCount } = await supabase
-        .from('appointments')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'cancelado');
-
-      // Pega todos os clientes e agendamentos para cálculos mais complexos (Aniversários e Manutenções)
-      const { data: allClients } = await supabase.from('clients').select('*');
-      const { data: allAppointments } = await supabase
-        .from('appointments')
-        .select('client_id, date_time')
-        .neq('status', 'cancelado');
+      const cancelledCount = allAppointments?.filter(a => a.status === 'cancelado').length || 0;
 
       // 2. Manutenções Atrasadas (Mesma inteligência da aba Manutenções)
       const now = new Date();
@@ -53,7 +47,7 @@ export default function AdminDashboard() {
       
       if (allClients && allAppointments) {
         allClients.forEach(client => {
-          const clientAppts = allAppointments.filter(a => a.client_id === client.id);
+          const clientAppts = allAppointments.filter(a => a.client_id === client.id && a.status !== 'cancelado');
           const hasFutureAppt = clientAppts.some(a => new Date(a.date_time) > now);
           if (hasFutureAppt) return; 
           
