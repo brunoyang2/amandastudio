@@ -202,3 +202,75 @@ select.premium-input option {
   background-color: var(--bg-primary);
   color: var(--text-primary);
 }
+
+/* Customização do React Calendar */
+.react-calendar {
+  width: 320px !important;
+  max-width: 100%;
+  background: white;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px;
+  font-family: inherit !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 10px;
+}
+
+.react-calendar__navigation button {
+  color: var(--admin-sidebar);
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-radius: 8px;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: #f7fafc;
+}
+
+.react-calendar__month-view__weekdays {
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.react-calendar__tile {
+  padding: 10px 0 !important;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: #edf2f7;
+}
+
+.react-calendar__tile--now {
+  background: #ebf8ff !important;
+  color: #3182ce;
+  font-weight: bold;
+}
+
+.react-calendar__tile--active {
+  background: var(--admin-sidebar) !important;
+  color: var(--gold-light) !important;
+  font-weight: bold;
+}
+
+/* Classe para dias com agendamentos */
+.has-appointment {
+  background-color: #fffaf0 !important;
+  color: #b8912d !important;
+  font-weight: bold;
+  border: 1px solid #ecc94b !important;
+}
+
+.has-appointment:hover {
+  background-color: #fefcbf !important;
+}
+
+.has-appointment.react-calendar__tile--active {
+  background-color: var(--admin-sidebar) !important;
+  color: var(--gold-light) !important;
+  border: none !important;
+}

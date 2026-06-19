@@ -1,13 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../../lib/supabase';
-import { Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Calendar as CalendarIcon } from 'lucide-react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
 export default function AgendaPage() {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDateStr, setSelectedDateStr] = useState(new Date().toISOString().split('T')[0]);
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointmentDates, setAppointmentDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  // Fechar calendário ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+        setShowCalendar(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Modal de Agendamento
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,25 +46,42 @@ export default function AgendaPage() {
   }
 
   // Carregar Agenda do Dia
+  const fetchAgenda = async () => {
+    setLoading(true);
+    const startOfDay = `${selectedDateStr}T00:00:00-03:00`;
+    const endOfDay = `${selectedDateStr}T23:59:59-03:00`;
+
+    const { data } = await supabase
+      .from('appointments')
+      .select('*, clients(name, phone)')
+      .gte('date_time', startOfDay)
+      .lte('date_time', endOfDay)
+      .neq('status', 'cancelado');
+
+    setAppointments(data || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    async function fetchAgenda() {
-      setLoading(true);
-      // Pega inicio e fim do dia selecionado
-      const startOfDay = `${selectedDate}T00:00:00-03:00`;
-      const endOfDay = `${selectedDate}T23:59:59-03:00`;
-
-      const { data } = await supabase
-        .from('appointments')
-        .select('*, clients(name, phone)')
-        .gte('date_time', startOfDay)
-        .lte('date_time', endOfDay)
-        .neq('status', 'cancelado');
-
-      setAppointments(data || []);
-      setLoading(false);
-    }
     fetchAgenda();
-  }, [selectedDate]);
+  }, [selectedDateStr]);
+
+  // Carregar todas as datas que têm agendamentos
+  const fetchAppointmentDates = async () => {
+    const { data } = await supabase
+      .from('appointments')
+      .select('date_time')
+      .neq('status', 'cancelado');
+      
+    if (data) {
+      const dates = data.map(a => a.date_time.split('T')[0]);
+      setAppointmentDates(Array.from(new Set(dates)));
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointmentDates();
+  }, []);
 
   // Carregar lista de clientes e serviços para o Modal
   useEffect(() => {
@@ -74,7 +107,7 @@ export default function AgendaPage() {
     if (!formClientId) return alert('Selecione um cliente válido da lista.');
     if (formServices.length === 0) return alert('Selecione ao menos um serviço.');
 
-    const dateTimeString = `${selectedDate}T${selectedTime}:00-03:00`;
+    const dateTimeString = `${selectedDateStr}T${selectedTime}:00-03:00`;
 
     const { error } = await supabase.from('appointments').insert([{
       client_id: formClientId,
@@ -89,9 +122,8 @@ export default function AgendaPage() {
     } else {
       alert('Agendado com sucesso!');
       setIsModalOpen(false);
-      // Recarregar agenda
-      const { data } = await supabase.from('appointments').select('*, clients(name, phone)').gte('date_time', `${selectedDate}T00:00:00-03:00`).lte('date_time', `${selectedDate}T23:59:59-03:00`).neq('status', 'cancelado');
-      setAppointments(data || []);
+      fetchAgenda();
+      fetchAppointmentDates();
     }
   };
 
@@ -100,11 +132,8 @@ export default function AgendaPage() {
       const { error } = await supabase.from('appointments').update({ status: 'cancelado' }).eq('id', apptId);
       if (!error) {
         alert('Agendamento cancelado com sucesso.');
-        // Recarregar
-        const startOfDay = `${selectedDate}T00:00:00-03:00`;
-        const endOfDay = `${selectedDate}T23:59:59-03:00`;
-        const { data } = await supabase.from('appointments').select('*, clients(name, phone)').gte('date_time', startOfDay).lte('date_time', endOfDay).neq('status', 'cancelado');
-        setAppointments(data || []);
+        fetchAgenda();
+        fetchAppointmentDates();
       } else {
         alert('Erro ao cancelar agendamento.');
       }
@@ -116,11 +145,7 @@ export default function AgendaPage() {
       const { error } = await supabase.from('appointments').update({ status: 'concluido' }).eq('id', apptId);
       if (!error) {
         alert('Agendamento concluído com sucesso!');
-        // Recarregar
-        const startOfDay = `${selectedDate}T00:00:00-03:00`;
-        const endOfDay = `${selectedDate}T23:59:59-03:00`;
-        const { data } = await supabase.from('appointments').select('*, clients(name, phone)').gte('date_time', startOfDay).lte('date_time', endOfDay).neq('status', 'cancelado');
-        setAppointments(data || []);
+        fetchAgenda();
       } else {
         alert('Erro ao concluir agendamento.');
       }
@@ -139,12 +164,52 @@ export default function AgendaPage() {
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--admin-sidebar)' }}>
           Agenda Diária
         </h1>
-        <input 
-          type="date" 
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          style={{ padding: '10px 15px', borderRadius: '8px', border: '1px solid #ccc', outline: 'none' }}
-        />
+        <div style={{ position: 'relative' }} ref={calendarRef}>
+          <button 
+            onClick={() => setShowCalendar(!showCalendar)}
+            style={{ 
+              padding: '10px 15px', 
+              borderRadius: '8px', 
+              border: '1px solid #ccc', 
+              backgroundColor: '#fff', 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontWeight: 'bold',
+              color: '#4a5568'
+            }}
+          >
+            {selectedDateStr.split('-').reverse().join('/')} <CalendarIcon size={18} />
+          </button>
+
+          {showCalendar && (
+            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '10px', zIndex: 50, boxShadow: '0 10px 25px rgba(0,0,0,0.1)', borderRadius: '12px', overflow: 'hidden' }}>
+              <Calendar 
+                onChange={(val: any) => {
+                  const y = val.getFullYear();
+                  const m = String(val.getMonth() + 1).padStart(2, '0');
+                  const d = String(val.getDate()).padStart(2, '0');
+                  setSelectedDateStr(`${y}-${m}-${d}`);
+                  setShowCalendar(false);
+                }}
+                value={new Date(selectedDateStr + 'T12:00:00')} // Força meio dia para não ter problema de fuso
+                tileClassName={({ date, view }) => {
+                  if (view === 'month') {
+                    const y = date.getFullYear();
+                    const m = String(date.getMonth() + 1).padStart(2, '0');
+                    const d = String(date.getDate()).padStart(2, '0');
+                    const dateString = `${y}-${m}-${d}`;
+                    if (appointmentDates.includes(dateString)) {
+                      return 'has-appointment';
+                    }
+                  }
+                  return null;
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #f0f0f0', overflow: 'hidden' }}>
