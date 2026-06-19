@@ -28,24 +28,50 @@ export default function AdminDashboard() {
         .from('clients')
         .select('*', { count: 'exact', head: true });
 
-      // 2. Manutenções Atrasadas (last_visit_date <= 30 dias atrás)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const { count: maintenanceCount } = await supabase
-        .from('clients')
-        .select('*', { count: 'exact', head: true })
-        .lte('last_visit_date', thirtyDaysAgo.toISOString().split('T')[0]);
-
       // 3. Cancelamentos
       const { count: cancelledCount } = await supabase
         .from('appointments')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'cancelado');
 
+      // Pega todos os clientes e agendamentos para cálculos mais complexos (Aniversários e Manutenções)
+      const { data: allClients } = await supabase.from('clients').select('*');
+      const { data: allAppointments } = await supabase
+        .from('appointments')
+        .select('client_id, date_time')
+        .neq('status', 'cancelado');
+
+      // 2. Manutenções Atrasadas (Mesma inteligência da aba Manutenções)
+      const now = new Date();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      let maintenanceCount = 0;
+      
+      if (allClients && allAppointments) {
+        allClients.forEach(client => {
+          const clientAppts = allAppointments.filter(a => a.client_id === client.id);
+          const hasFutureAppt = clientAppts.some(a => new Date(a.date_time) > now);
+          if (hasFutureAppt) return; 
+          
+          const pastAppts = clientAppts
+            .filter(a => new Date(a.date_time) <= now)
+            .sort((a, b) => new Date(b.date_time).getTime() - new Date(a.date_time).getTime());
+                                       
+          let lastVisitDateStr = client.last_visit_date; 
+          if (pastAppts.length > 0) {
+            lastVisitDateStr = pastAppts[0].date_time;
+          }
+          
+          const lastVisitDate = new Date(lastVisitDateStr);
+          if (lastVisitDate <= thirtyDaysAgo) {
+            maintenanceCount++;
+          }
+        });
+      }
+
       // 4. Aniversariantes do Mês
       const currentMonth = new Date().getMonth() + 1; // 1 a 12
-      // No Supabase é chato filtrar só pelo mês em campo date, então pegamos todos e filtramos no front por ser MVP
-      const { data: allClients } = await supabase.from('clients').select('birthdate');
       let bdays = 0;
       if (allClients) {
         bdays = allClients.filter(c => {
