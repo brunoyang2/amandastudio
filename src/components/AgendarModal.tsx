@@ -8,6 +8,7 @@ export default function AgendarModal({ isOpen, onClose }: { isOpen: boolean, onC
   const [services, setServices] = useState<any[]>([]);
   
   const [searchClient, setSearchClient] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('09:00');
@@ -124,15 +125,20 @@ export default function AgendarModal({ isOpen, onClose }: { isOpen: boolean, onC
                 type="text" 
                 placeholder="🔍 Escreva o nome para procurar..." 
                 value={searchClient}
-                onChange={e => setSearchClient(e.target.value)}
+                onChange={e => { setSearchClient(e.target.value); setShowDropdown(true); }}
+                onFocus={() => setShowDropdown(true)}
                 style={{ width: '100%', padding: '12px 15px 12px 40px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none' }}
               />
-              {searchClient && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', marginTop: '4px', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+              {showDropdown && searchClient && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', marginTop: '4px', zIndex: 10, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
                   {filteredClients.length > 0 ? filteredClients.map(c => (
                     <div 
                       key={c.id}
-                      onClick={() => { setSelectedClientId(c.id); setSearchClient(c.name); }}
+                      onClick={() => { 
+                        setSelectedClientId(c.id); 
+                        setSearchClient(c.name); 
+                        setShowDropdown(false); 
+                      }}
                       style={{ padding: '12px 15px', cursor: 'pointer', backgroundColor: selectedClientId === c.id ? '#ebf8ff' : '#fff', borderBottom: '1px solid #edf2f7' }}
                     >
                       <strong>{c.name}</strong> <span style={{ color: '#718096', fontSize: '0.9rem' }}>({c.phone})</span>
