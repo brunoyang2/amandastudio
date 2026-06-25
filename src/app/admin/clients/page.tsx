@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
-import { Phone, Calendar, Gift, Trash2 } from 'lucide-react';
+import { Phone, Calendar, Gift, Trash2, Edit2 } from 'lucide-react';
+import EditarClienteModal from '../../../components/EditarClienteModal';
 
 interface Client {
   id: string;
@@ -15,6 +16,7 @@ interface Client {
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   // Busca os clientes do banco de dados
   const fetchClients = async () => {
@@ -87,29 +89,60 @@ export default function ClientsPage() {
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1a365d' }}>
                   {client.name}
                 </h3>
-                <p style={{ color: 'var(--admin-text-light)', marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <Phone size={14} /> {client.phone} • <Calendar size={14} /> Visita: {formatDate(client.last_visit_date)} • <Gift size={14} /> Nasc: {formatDate(client.birthdate)}
-                </p>
+                <div style={{ color: 'var(--admin-text-light)', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Phone size={14} /> {client.phone}</span>
+                    <span className="desktop-dot">•</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Calendar size={14} /> Visita: {formatDate(client.last_visit_date)}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <Gift size={14} /> Nasc: {formatDate(client.birthdate)}
+                  </div>
+                </div>
               </div>
               
-              <button 
-                onClick={() => handleDelete(client.id)}
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: '#a0aec0', 
-                  cursor: 'pointer',
-                  fontSize: '1.5rem',
-                  padding: '10px'
-                }}
-                title="Apagar Cliente"
-              >
-                <Trash2 size={20} />
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button 
+                  onClick={() => setEditingClient(client)}
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: '#3182ce', 
+                    cursor: 'pointer',
+                    fontSize: '1.5rem',
+                    padding: '10px'
+                  }}
+                  title="Editar Cliente"
+                >
+                  <Edit2 size={20} />
+                </button>
+                <button 
+                  onClick={() => handleDelete(client.id)}
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: '#a0aec0', 
+                    cursor: 'pointer',
+                    fontSize: '1.5rem',
+                    padding: '10px'
+                  }}
+                  title="Apagar Cliente"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Modal de Edição */}
+      <EditarClienteModal 
+        isOpen={!!editingClient} 
+        onClose={() => setEditingClient(null)} 
+        client={editingClient} 
+        onSuccess={fetchClients} 
+      />
     </div>
   );
 }

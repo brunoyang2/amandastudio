@@ -274,3 +274,9 @@ select.premium-input option {
   color: var(--gold-light) !important;
   border: none !important;
 }
+
+@media (max-width: 600px) {
+  .desktop-dot {
+    display: none;
+  }
+}
