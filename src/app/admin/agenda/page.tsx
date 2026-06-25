@@ -5,6 +5,7 @@ import { supabase } from '../../../lib/supabase';
 import { Clock, CheckCircle, XCircle, Calendar as CalendarIcon } from 'lucide-react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import ConfirmModal from '../../../components/ConfirmModal';
 
 export default function AgendaPage() {
   const [selectedDateStr, setSelectedDateStr] = useState(new Date().toISOString().split('T')[0]);
@@ -38,6 +39,15 @@ export default function AgendaPage() {
   const [formClientId, setFormClientId] = useState('');
   const [formServices, setFormServices] = useState<string[]>([]);
   const [showClientDropdown, setShowClientDropdown] = useState(false);
+
+  // Estado do modal de confirmação
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmColor?: string;
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
 
   // Horários disponíveis (08:00 às 18:00, a cada 30 min)
   const timeSlots = [];
@@ -129,29 +139,49 @@ export default function AgendaPage() {
     }
   };
 
-  const handleCancelAppointment = async (apptId: string) => {
-    if (window.confirm('Tem certeza que deseja cancelar este agendamento e deixar o horário livre?')) {
-      const { error } = await supabase.from('appointments').update({ status: 'cancelado' }).eq('id', apptId);
-      if (!error) {
-        alert('Agendamento cancelado com sucesso.');
-        fetchAgenda();
-        fetchAppointmentDates();
-      } else {
-        alert('Erro ao cancelar agendamento.');
-      }
-    }
+  const confirmAction = (title: string, message: string, action: () => void, confirmColor?: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: action,
+      confirmColor
+    });
   };
 
-  const handleConcluirAppointment = async (apptId: string) => {
-    if (window.confirm('A cliente já foi atendida? Ao concluir, este agendamento sairá da contagem do Dashboard.')) {
-      const { error } = await supabase.from('appointments').update({ status: 'concluido' }).eq('id', apptId);
-      if (!error) {
-        alert('Agendamento concluído com sucesso!');
-        fetchAgenda();
-      } else {
-        alert('Erro ao concluir agendamento.');
-      }
-    }
+  const handleCancelAppointment = (apptId: string) => {
+    confirmAction(
+      'Cancelar Agendamento',
+      'Tem certeza que deseja cancelar este agendamento e deixar o horário livre?',
+      async () => {
+        const { error } = await supabase.from('appointments').update({ status: 'cancelado' }).eq('id', apptId);
+        if (!error) {
+          alert('Agendamento cancelado com sucesso.');
+          fetchAgenda();
+          fetchAppointmentDates();
+        } else {
+          alert('Erro ao cancelar agendamento.');
+        }
+      },
+      '#e53e3e'
+    );
+  };
+
+  const handleConcluirAppointment = (apptId: string) => {
+    confirmAction(
+      'Concluir Agendamento',
+      'A cliente já foi atendida? Ao concluir, este agendamento sairá da contagem do Dashboard.',
+      async () => {
+        const { error } = await supabase.from('appointments').update({ status: 'concluido' }).eq('id', apptId);
+        if (!error) {
+          alert('Agendamento concluído com sucesso!');
+          fetchAgenda();
+        } else {
+          alert('Erro ao concluir agendamento.');
+        }
+      },
+      '#48bb78'
+    );
   };
 
   // Filtra clientes baseados na pesquisa (Nome ou Telefone)
@@ -359,6 +389,16 @@ export default function AgendaPage() {
           </div>
         </div>
       )}
+
+      {/* Modal de Confirmação Genérico */}
+      <ConfirmModal
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        confirmColor={confirmDialog.confirmColor}
+      />
     </div>
   );
 }
